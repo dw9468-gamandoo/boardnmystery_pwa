@@ -90,7 +90,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged }
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
@@ -110,16 +110,22 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  window.loginWithGoogle = async function() {
+window.loginWithGoogle = async function() {
     document.getElementById('loading').style.display = 'block';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     try {
-      const result = await signInWithPopup(auth, provider);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
+      }
     } catch (e) {
       document.getElementById('loading').style.display = 'none';
       alert('로그인 실패: ' + e.message);
     }
   };
 
+  getRedirectResult(auth).catch(e => console.log(e));
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       document.getElementById('loginBox').style.display = 'none';
