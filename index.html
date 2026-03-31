@@ -118,6 +118,12 @@
         padding: 16px;
       }
     }
+    .help-text {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #999;
+  line-height: 1.5;
+}
   </style>
 </head>
 <body>
@@ -129,7 +135,11 @@
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
       Google로 로그인
     </button>
-    <div class="loading" id="loading">로그인 중...</div>
+<div class="loading" id="loading">로그인 중...</div>
+<p class="help-text">
+  카카오톡/인스타 앱 내부 브라우저에서는 로그인이 안 될 수 있습니다.<br>
+  Chrome 또는 Safari에서 열어주세요.
+</p>
   </div>
 
   <div id="app">
@@ -141,88 +151,98 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc }
-      from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEBj278FWgPBI91U6tcu1_eHIJKSQ1q0k",
-      authDomain: "boardnmystery.firebaseapp.com",
-      projectId: "boardnmystery",
-      storageBucket: "boardnmystery.firebasestorage.app",
-      messagingSenderId: "210410925391",
-      appId: "1:210410925391:web:deb17ddf62e72d507be93a",
-      measurementId: "G-VL10HXLMSG"
-    };
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "boardnmystery.firebaseapp.com",
+    projectId: "boardnmystery",
+    storageBucket: "boardnmystery.firebasestorage.app",
+    messagingSenderId: "210410925391",
+    appId: "1:210410925391:web:deb17ddf62e72d507be93a"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
 
-    window.loginWithGoogle = async function() {
-      document.getElementById('loading').style.display = 'block';
+  function isInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return /KAKAOTALK|Instagram|FBAN|FBAV|Line|NAVER|Whale|wv/i.test(ua);
+  }
 
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  function showExternalBrowserGuide() {
+    alert('현재 앱 내부 브라우저에서는 Google 로그인이 차단될 수 있습니다. 우측 상단 메뉴에서 "브라우저에서 열기" 또는 "Chrome/Safari로 열기" 후 다시 로그인해주세요.');
+  }
 
-      try {
-        if (isMobile) {
-          await signInWithRedirect(auth, provider);
-        } else {
-          await signInWithPopup(auth, provider);
-        }
-      } catch (e) {
-        document.getElementById('loading').style.display = 'none';
-        alert('로그인 실패: ' + e.message);
+  window.loginWithGoogle = async function() {
+    document.getElementById('loading').style.display = 'block';
+
+    if (isInAppBrowser()) {
+      document.getElementById('loading').style.display = 'none';
+      showExternalBrowserGuide();
+      return;
+    }
+
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    try {
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
       }
-    };
-
-    getRedirectResult(auth).catch(e => {
+    } catch (e) {
       document.getElementById('loading').style.display = 'none';
-      console.log(e);
-    });
+      alert('로그인 실패: ' + e.message);
+    }
+  };
 
-    onAuthStateChanged(auth, async (user) => {
-      document.getElementById('loading').style.display = 'none';
+  getRedirectResult(auth).catch(e => {
+    document.getElementById('loading').style.display = 'none';
+    console.log(e);
+  });
 
-      if (!user) return;
+  onAuthStateChanged(auth, async (user) => {
+    document.getElementById('loading').style.display = 'none';
+    if (!user) return;
 
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      document.getElementById('userName').textContent = user.displayName || '이름 없음';
-      document.getElementById('userEmail').textContent = user.email || '';
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('userName').textContent = user.displayName || '';
+    document.getElementById('userEmail').textContent = user.email || '';
 
-      try {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          document.getElementById('userStatus').textContent =
-            '등급: ' + (data.grade || '어색') + ' | 포인트: ' + (data.point || 0);
-        } else {
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email || '',
-            nickname: user.displayName || '',
-            grade: '어색',
-            point: 0,
-            warnCount: 0,
-            joinDate: new Date().toISOString()
-          });
-
-          document.getElementById('userStatus').textContent =
-            '등급: 어색 | 신규 가입 완료';
-        }
-      } catch (e) {
-        console.log(e);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
         document.getElementById('userStatus').textContent =
-          '회원 정보를 불러오는 중 오류가 발생했습니다.';
+          '등급: ' + (data.grade || '어색') + ' | 포인트: ' + (data.point || 0);
+      } else {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email || '',
+          nickname: user.displayName || '',
+          grade: '어색',
+          point: 0,
+          warnCount: 0,
+          joinDate: new Date().toISOString()
+        });
+        document.getElementById('userStatus').textContent = '등급: 어색 | 신규 가입 완료';
       }
-    });
-  </script>
+    } catch (e) {
+      console.log(e);
+      document.getElementById('userStatus').textContent = '회원 정보를 불러오는 중 오류가 발생했습니다.';
+    }
+  });
+</script>
 
   <script>
     if ('serviceWorker' in navigator) {
