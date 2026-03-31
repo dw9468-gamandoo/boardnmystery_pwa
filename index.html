@@ -153,4 +153,11 @@
 </script>
 
 </body>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/boardnmystery_pwa/sw.js')
+      .then(() => console.log('SW 등록 완료'))
+      .catch(e => console.log('SW 등록 실패', e));
+  }
+</script>
 </html>
