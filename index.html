@@ -4,161 +4,185 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>보드앤미스터리</title>
-
+  >
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #0f0f0f;
       color: #fff;
       min-height: 100vh;
-      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 24px;
     }
-
-    .login-box {
-      text-align: center;
-      padding: 40px 24px;
+    .box {
       width: 100%;
       max-width: 360px;
     }
-
     .logo {
       font-size: 26px;
       font-weight: 700;
+      text-align: center;
       margin-bottom: 8px;
-      color: #fff;
     }
-
     .subtitle {
       font-size: 14px;
       color: #888;
-      margin-bottom: 48px;
-      line-height: 1.5;
+      text-align: center;
+      margin-bottom: 40px;
     }
-
-    .google-btn {
+    .tab-row {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #333;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      color: #888;
+      font-size: 15px;
+    }
+    .tab.active {
+      color: #fff;
+      border-bottom: 2px solid #fff;
+      font-weight: 600;
+    }
+    input {
       width: 100%;
-      min-height: 52px;
-      padding: 14px 24px;
+      padding: 14px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    input::placeholder { color: #555; }
+    input:focus { outline: none; border-color: #666; }
+    .btn {
+      width: 100%;
+      padding: 14px;
       background: #fff;
-      color: #333;
+      color: #000;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
     }
-
-    .google-btn:hover { background: #f0f0f0; }
-    .google-btn:active { transform: scale(0.98); }
-    .google-btn img { width: 22px; height: 22px; }
-
-    .loading {
-      display: none;
-      font-size: 14px;
-      color: #888;
-      margin-top: 24px;
+    .btn:hover { background: #eee; }
+    .msg {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #ff6b6b;
+      text-align: center;
+      min-height: 20px;
     }
-
-    #app {
+    .msg.success { color: #6bff9e; }
+    #appBox {
       display: none;
       width: 100%;
-      max-width: 480px;
-      padding: 24px;
+      max-width: 360px;
     }
-
-    .user-info {
+    .user-card {
       background: #1a1a1a;
       border-radius: 12px;
-      padding: 20px;
+      padding: 24px;
       text-align: center;
     }
-
-    .user-info p {
-      color: #aaa;
+    .user-card h2 { font-size: 20px; margin-bottom: 8px; }
+    .user-card p { color: #888; font-size: 14px; margin-top: 4px; }
+    .grade-badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 14px;
+      background: #333;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .logout-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid #444;
+      border-radius: 10px;
+      color: #888;
       font-size: 14px;
-      margin-top: 8px;
-      line-height: 1.5;
+      cursor: pointer;
     }
-
-    #userName {
-      font-size: 20px;
-      font-weight: 700;
+    .pending-notice {
+      margin-top: 16px;
+      padding: 12px;
+      background: #2a2000;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #ffcc00;
+      text-align: center;
     }
-
-    @media (max-width: 480px) {
-      .login-box {
-        padding: 32px 20px;
-      }
-
-      .logo {
-        font-size: 22px;
-      }
-
-      .subtitle {
-        margin-bottom: 32px;
-      }
-
-      #app {
-        padding: 16px;
-      }
-
-      .user-info {
-        padding: 16px;
-      }
-    }
-    .help-text {
-  margin-top: 16px;
-  font-size: 13px;
-  color: #999;
-  line-height: 1.5;
-}
   </style>
 </head>
 <body>
 
-  <div class="login-box" id="loginBox">
-    <div class="logo">보드앤미스터리</div>
-    <div class="subtitle">보드게임 & 머더미스터리 커뮤니티</div>
-    <button class="google-btn" onclick="loginWithGoogle()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-      Google로 로그인
-    </button>
-<div class="loading" id="loading">로그인 중...</div>
-<p class="help-text">
-  카카오톡/인스타 앱 내부 브라우저에서는 로그인이 안 될 수 있습니다.<br>
-  Chrome 또는 Safari에서 열어주세요.
-</p>
+<!-- 로그인/회원가입 -->
+<div class="box" id="authBox">
+  <div class="logo">보드앤미스터리</div>
+  <div class="subtitle">보드게임 & 머더미스터리 커뮤니티</div>
+
+  <div class="tab-row">
+    <div class="tab active" id="tabLogin" onclick="switchTab('login')">로그인</div>
+    <div class="tab" id="tabJoin" onclick="switchTab('join')">회원가입</div>
   </div>
 
-  <div id="app">
-    <div class="user-info">
-      <div id="userName"></div>
-      <p id="userEmail"></p>
-      <p id="userStatus"></p>
+  <!-- 로그인 폼 -->
+  <div id="loginForm">
+    <input type="email" id="loginEmail" placeholder="이메일" />
+    <input type="password" id="loginPw" placeholder="비밀번호" />
+    <button class="btn" onclick="doLogin()">로그인</button>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <!-- 회원가입 폼 -->
+  <div id="joinForm" style="display:none;">
+    <input type="email" id="joinEmail" placeholder="이메일" />
+    <input type="password" id="joinPw" placeholder="비밀번호 (6자 이상)" />
+    <input type="text" id="joinNick" placeholder="닉네임 (중복 불가)" />
+    <input type="tel" id="joinPhone" placeholder="연락처 (010-0000-0000)" />
+    <button class="btn" onclick="doJoin()">가입하기</button>
+    <div class="msg" id="joinMsg"></div>
+  </div>
+</div>
+
+<!-- 로그인 후 화면 -->
+<div id="appBox">
+  <div class="user-card">
+    <h2 id="userName"></h2>
+    <p id="userEmail"></p>
+    <div class="grade-badge" id="userGrade"></div>
+    <p id="userPoint"></p>
+    <div class="pending-notice" id="pendingNotice" style="display:none;">
+      ⏳ 정회원 승인 대기 중입니다.<br>승인 후 모든 기능을 이용할 수 있습니다.
     </div>
   </div>
+  <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+</div>
 
-  <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged }
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+           signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc }
+  import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyDEBj278FWgPBI91U6tcu1_eHIJKSQ1q0k",
     authDomain: "boardnmystery.firebaseapp.com",
     projectId: "boardnmystery",
     storageBucket: "boardnmystery.firebasestorage.app",
@@ -169,88 +193,117 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
 
-  function isInAppBrowser() {
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    return /KAKAOTALK|Instagram|FBAN|FBAV|Line|NAVER|Whale|wv/i.test(ua);
-  }
+  // 탭 전환
+  window.switchTab = function(tab) {
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('joinForm').style.display = tab === 'join' ? 'block' : 'none';
+    document.getElementById('tabLogin').className = 'tab' + (tab === 'login' ? ' active' : '');
+    document.getElementById('tabJoin').className = 'tab' + (tab === 'join' ? ' active' : '');
+  };
 
-  function showExternalBrowserGuide() {
-    alert('현재 앱 내부 브라우저에서는 Google 로그인이 차단될 수 있습니다. 우측 상단 메뉴에서 "브라우저에서 열기" 또는 "Chrome/Safari로 열기" 후 다시 로그인해주세요.');
-  }
-
-  window.loginWithGoogle = async function() {
-    document.getElementById('loading').style.display = 'block';
-
-    if (isInAppBrowser()) {
-      document.getElementById('loading').style.display = 'none';
-      showExternalBrowserGuide();
-      return;
-    }
-
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
+  // 로그인
+  window.doLogin = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw = document.getElementById('loginPw').value;
+    const msg = document.getElementById('loginMsg');
+    if (!email || !pw) { msg.textContent = '이메일과 비밀번호를 입력해주세요.'; return; }
     try {
-      if (isMobile) {
-        await signInWithRedirect(auth, provider);
-      } else {
-        await signInWithPopup(auth, provider);
-      }
-    } catch (e) {
-      document.getElementById('loading').style.display = 'none';
-      alert('로그인 실패: ' + e.message);
+      await signInWithEmailAndPassword(auth, email, pw);
+    } catch(e) {
+      msg.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
     }
   };
 
-  getRedirectResult(auth).catch(e => {
-    document.getElementById('loading').style.display = 'none';
-    console.log(e);
-  });
+  // 회원가입
+  window.doJoin = async function() {
+    const email = document.getElementById('joinEmail').value.trim();
+    const pw = document.getElementById('joinPw').value;
+    const nick = document.getElementById('joinNick').value.trim();
+    const phone = document.getElementById('joinPhone').value.trim();
+    const msg = document.getElementById('joinMsg');
 
-  onAuthStateChanged(auth, async (user) => {
-    document.getElementById('loading').style.display = 'none';
-    if (!user) return;
+    if (!email || !pw || !nick || !phone) {
+      msg.textContent = '모든 항목을 입력해주세요.'; return;
+    }
+    if (pw.length < 6) {
+      msg.textContent = '비밀번호는 6자 이상이어야 합니다.'; return;
+    }
 
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('userName').textContent = user.displayName || '';
-    document.getElementById('userEmail').textContent = user.email || '';
+    // 닉네임 중복 체크
+    const nickQ = query(collection(db, 'users'), where('nickname', '==', nick));
+    const nickSnap = await getDocs(nickQ);
+    if (!nickSnap.empty) {
+      msg.textContent = '이미 사용 중인 닉네임입니다.'; return;
+    }
+
+    // 연락처 중복 체크
+    const phoneQ = query(collection(db, 'users'), where('phone', '==', phone));
+    const phoneSnap = await getDocs(phoneQ);
+    if (!phoneSnap.empty) {
+      msg.textContent = '이미 등록된 연락처입니다.'; return;
+    }
 
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        document.getElementById('userStatus').textContent =
-          '등급: ' + (data.grade || '어색') + ' | 포인트: ' + (data.point || 0);
+      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        uid: cred.user.uid,
+        email: email,
+        nickname: nick,
+        phone: phone,
+        grade: '어색',
+        point: 0,
+        warnCount: 0,
+        memberStatus: 'pending',
+        joinDate: new Date().toISOString()
+      });
+      msg.className = 'msg success';
+      msg.textContent = '가입 완료! 정회원 승인 후 이용 가능합니다.';
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        msg.textContent = '이미 가입된 이메일입니다.';
       } else {
-        await setDoc(userRef, {
-          uid: user.uid,
-          email: user.email || '',
-          nickname: user.displayName || '',
-          grade: '어색',
-          point: 0,
-          warnCount: 0,
-          joinDate: new Date().toISOString()
-        });
-        document.getElementById('userStatus').textContent = '등급: 어색 | 신규 가입 완료';
+        msg.textContent = '가입 실패: ' + e.message;
       }
-    } catch (e) {
-      console.log(e);
-      document.getElementById('userStatus').textContent = '회원 정보를 불러오는 중 오류가 발생했습니다.';
+    }
+  };
+
+  // 로그아웃
+  window.doLogout = async function() {
+    await signOut(auth);
+  };
+
+  // 인증 상태 감지
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      document.getElementById('authBox').style.display = 'none';
+      document.getElementById('appBox').style.display = 'block';
+
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('userName').textContent = d.nickname;
+        document.getElementById('userEmail').textContent = d.email;
+        document.getElementById('userGrade').textContent = d.grade || '어색';
+        document.getElementById('userPoint').textContent = '포인트: ' + (d.point || 0) + 'P';
+        if (d.memberStatus === 'pending') {
+          document.getElementById('pendingNotice').style.display = 'block';
+        }
+      }
+    } else {
+      document.getElementById('authBox').style.display = 'block';
+      document.getElementById('appBox').style.display = 'none';
     }
   });
 </script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/boardnmystery_pwa/sw.js')
-        .then(() => console.log('SW 등록 완료'))
-        .catch(e => console.log('SW 등록 실패', e));
-    }
-  </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/boardnmystery_pwa/sw.js')
+      .then(() => console.log('SW 등록 완료'))
+      .catch(e => console.log('SW 등록 실패', e));
+  }
+</script>
 
 </body>
 </html>
