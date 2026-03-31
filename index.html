@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보드앤미스터리</title>
+  >
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      text-align: center;
+      padding: 40px 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 48px;
+    }
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
+      background: #fff;
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .google-btn:hover { background: #f0f0f0; }
+    .google-btn img { width: 22px; height: 22px; }
+    .loading {
+      display: none;
+      font-size: 14px;
+      color: #888;
+      margin-top: 24px;
+    }
+    #app { display: none; width: 100%; max-width: 480px; padding: 24px; }
+    .user-info {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .user-info p { color: #aaa; font-size: 14px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <div class="logo">보드앤미스터리</div>
+  <div class="subtitle">보드게임 & 머더미스터리 커뮤니티</div>
+  <button class="google-btn" onclick="loginWithGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    Google로 로그인
+  </button>
+  <div class="loading" id="loading">로그인 중...</div>
+</div>
+
+<div id="app">
+  <div class="user-info">
+    <div id="userName"></div>
+    <p id="userEmail"></p>
+    <p id="userStatus"></p>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEBj278FWgPBI91U6tcu1_eHIJKSQ1q0k",
+    authDomain: "boardnmystery.firebaseapp.com",
+    projectId: "boardnmystery",
+    storageBucket: "boardnmystery.firebasestorage.app",
+    messagingSenderId: "210410925391",
+    appId: "1:210410925391:web:deb17ddf62e72d507be93a",
+    measurementId: "G-VL10HXLMSG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  window.loginWithGoogle = async function() {
+    document.getElementById('loading').style.display = 'block';
+    try {
+      const result = await signInWithPopup(auth, provider);
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      alert('로그인 실패: ' + e.message);
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('userName').textContent = user.displayName;
+      document.getElementById('userEmail').textContent = user.email;
+
+      // Firestore에서 회원 확인
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        document.getElementById('userStatus').textContent =
+          '등급: ' + (data.grade || '어색') + ' | 포인트: ' + (data.point || 0);
+      } else {
+        // 신규 회원 자동 등록
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          nickname: user.displayName,
+          grade: '어색',
+          point: 0,
+          warnCount: 0,
+          joinDate: new Date().toISOString()
+        });
+        document.getElementById('userStatus').textContent = '등급: 어색 | 신규 가입 완료';
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
