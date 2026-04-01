@@ -408,31 +408,21 @@
   };
 
   // BGG 검색
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzgw3ZiG1dFNHvQUGUeTuVIHb31mlJX_DsERonnkyxiXREOGHbGaJB9oHMwBOzoUYB2w/exec';
+
   window.searchBGG = async function() {
     const query_str = document.getElementById('bggSearch').value.trim();
     if (!query_str) return;
     const el = document.getElementById('bggResults');
     el.innerHTML = '<div style="color:#888;font-size:13px;margin-top:8px">검색 중...</div>';
     try {
-      const targetUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query_str)}&type=boardgame`;
-      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;      
-      const res = await fetch(proxyUrl);
-      const text = await res.text();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, 'text/xml');
-      const items = xml.querySelectorAll('item');
-      if (!items.length) {
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=searchBGG&query=${encodeURIComponent(query_str)}`);
+      const data = await res.json();
+      if (!data.results || !data.results.length) {
         el.innerHTML = '<div style="color:#888;font-size:13px;margin-top:8px">검색 결과가 없습니다.</div>';
         return;
       }
-      const results = Array.from(items).slice(0, 10).map(item => {
-        const id = item.getAttribute('id');
-        const nameEl = item.querySelector('name[type="primary"]');
-        const name = nameEl ? nameEl.getAttribute('value') : '?';
-        const year = item.querySelector('yearpublished')?.getAttribute('value') || '';
-        return { id, name, year };
-      });
-      el.innerHTML = results.map(r => `
+      el.innerHTML = data.results.map(r => `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #222">
           <div>
             <div style="font-size:14px">${r.name}</div>
@@ -449,58 +439,12 @@
     const el = document.getElementById('bggResults');
     el.innerHTML = '<div style="color:#888;font-size:13px;margin-top:8px">상세 정보 불러오는 중...</div>';
     try {
-      const targetUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${bggId}&stats=1`;
-      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
-      const res = await fetch(proxyUrl);
-      const text = await res.text();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, 'text/xml');
-      const item = xml.querySelector('item');
-      if (!item) { el.innerHTML = '<div style="color:#ff6b6b">정보를 가져올 수 없습니다.</div>'; return; }
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=getBGGDetail&id=${bggId}`);
+      const gameData = await res.json();
+      if (gameData.error) { el.innerHTML = '<div style="color:#ff6b6b">정보를 가져올 수 없습니다.</div>'; return; }}
 
-      const image = item.querySelector('image')?.textContent?.trim() || '';
-      const thumbnail = item.querySelector('thumbnail')?.textContent?.trim() || '';
-      const desc = item.querySelector('description')?.textContent?.trim().replace(/&#10;/g,' ').substring(0, 300) || '';
-      const minPlayers = parseInt(item.querySelector('minplayers')?.getAttribute('value')) || 0;
-      const maxPlayers = parseInt(item.querySelector('maxplayers')?.getAttribute('value')) || 0;
-      const minPlaytime = parseInt(item.querySelector('minplaytime')?.getAttribute('value')) || 0;
-      const maxPlaytime = parseInt(item.querySelector('maxplaytime')?.getAttribute('value')) || 0;
-      const minAge = parseInt(item.querySelector('minage')?.getAttribute('value')) || 0;
-      const bggRating = parseFloat(item.querySelector('statistics ratings average')?.getAttribute('value')) || 0;
-      const weight = parseFloat(item.querySelector('statistics ratings averageweight')?.getAttribute('value')) || 0;
-
-      // BGG 추천 인원
-      const bestWith = [];
-      item.querySelectorAll('poll[name="suggested_numplayers"] results').forEach(r => {
-        const best = r.querySelector('result[value="Best"]');
-        if (best && parseInt(best.getAttribute('numvotes')) > 0) {
-          bestWith.push(r.getAttribute('numplayers'));
-        }
-      });
-      const recommendedPlayers = bestWith.join(',');
-
-      let difficulty = '초급';
-      if (weight >= 3.5) difficulty = '고급';
-      else if (weight >= 2.5) difficulty = '중급';
-      else if (weight >= 1.5) difficulty = '초급';
-      else difficulty = '입문';
-
-      const imgFull = image ? (image.startsWith('http') ? image : `https:${image}`) : '';
-      const imgThumb = thumbnail ? (thumbnail.startsWith('http') ? thumbnail : `https:${thumbnail}`) : '';
-
-      const gameData = {
-        name: item.querySelector('name[type="primary"]')?.getAttribute('value') || name,
-        nameKo: '', bggId,
-        image: imgFull, thumbnail: imgThumb,
-        desc, minPlayers, maxPlayers,
-        recommendedPlayers,
-        minPlaytime, maxPlaytime, minAge,
-        bggRating: Math.round(bggRating * 10) / 10,
-        bggComplexity: Math.round(weight * 100) / 100,
-        difficulty, genre: '', series: '',
-        seriesOrder: 0, oneTime: false, link: '',
-        rating: 0, ratingCount: 0
-      };
+            const imgThumb = gameData.thumbnail || '';
+      const imgFull = gameData.image || '';
 
       el.innerHTML = `
         <div class="card" style="margin-top:12px">
@@ -508,9 +452,9 @@
             ${imgThumb ? `<img src="${imgThumb}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0">` : ''}
             <div>
               <div style="font-size:16px;font-weight:600">${gameData.name}</div>
-              <div style="font-size:12px;color:#888;margin-top:4px">${minPlayers}~${maxPlayers}명 (추천: ${recommendedPlayers||'-'}명)</div>
-              <div style="font-size:12px;color:#888">${minPlaytime}~${maxPlaytime}분 | BGG 평점: ${gameData.bggRating} | 복잡도: ${gameData.bggComplexity}</div>
-              <div style="font-size:12px;color:#888">자동 난이도: ${difficulty}</div>
+              <div style="font-size:12px;color:#888;margin-top:4px">${gameData.minPlayers}~${gameData.maxPlayers}명 (추천: ${gameData.recommendedPlayers||'-'}명)</div>
+              <div style="font-size:12px;color:#888">${gameData.minPlaytime}~${gameData.maxPlaytime}분 | BGG 평점: ${gameData.bggRating} | 복잡도: ${gameData.bggComplexity}</div>
+              <div style="font-size:12px;color:#888">자동 난이도: ${gameData.difficulty}</div>
             </div>
           </div>
           <div style="margin-top:12px">
@@ -532,6 +476,8 @@
           <button class="btn btn-green" id="saveBggBtn">✅ 이 게임 등록</button>
         </div>`;
 
+      gameData.image = imgFull;
+      gameData.thumbnail = imgThumb;
       document.getElementById('saveBggBtn').onclick = () => saveBGGGame(gameData);
     } catch(e) {
       el.innerHTML = '<div style="color:#ff6b6b;font-size:13px;margin-top:8px">상세 정보 로드 실패: ' + e.message + '</div>';
