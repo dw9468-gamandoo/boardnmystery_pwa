@@ -88,36 +88,71 @@
   </div>
 
   <div class="section" id="section-games">
-    <h2>게임 등록</h2>
+  <!-- BGG 검색 -->
+  <h2>BGG에서 게임 검색</h2>
+    <div class="card">
+      <div class="form-row">
+        <input id="bggSearch" placeholder="게임 이름으로 검색 (영문 권장)" />
+        <button class="btn btn-blue" style="white-space:nowrap" onclick="searchBGG()">검색</button>
+      </div>
+      <div id="bggResults"></div>
+    </div>
+  
+    <!-- CSV 업로드 -->
+    <h2>CSV 일괄 등록</h2>
+    <div class="card">
+      <div class="meta" style="margin-bottom:8px;color:#aaa">
+        CSV 형식: name, nameKo, bggId, genre, series, seriesOrder, oneTime, link<br>
+        1행은 헤더, 2행부터 데이터
+      </div>
+      <a href="#" onclick="downloadCSVTemplate()" style="color:#4af;font-size:13px">📥 CSV 템플릿 다운로드</a>
+      <br><br>
+      <input type="file" id="csvFile" accept=".csv" style="background:transparent;border:none;color:#aaa;padding:0" />
+      <button class="btn btn-green" style="margin-top:8px" onclick="uploadCSV()">CSV 업로드</button>
+      <div id="csvMsg" style="font-size:13px;margin-top:8px;color:#6bff9e"></div>
+    </div>
+  
+    <!-- 수동 등록 -->
+    <h2>수동 등록</h2>
     <div class="card">
       <input id="gName" placeholder="게임 이름 *" />
+      <input id="gNameKo" placeholder="한국어 이름" />
+      <input id="gBggId" placeholder="BGG ID (선택)" />
       <div class="form-row">
+        <input id="gMinPlayers" placeholder="최소 인원" type="number" />
         <input id="gMax" placeholder="최대 인원 *" type="number" />
+      </div>
+      <div class="form-row">
+        <input id="gMinPlaytime" placeholder="최소 플레이시간(분)" type="number" />
+        <input id="gMaxPlaytime" placeholder="최대 플레이시간(분)" type="number" />
+      </div>
+      <div class="form-row">
         <select id="gGenre">
           <option value="">장르 선택</option>
           <option>머더미스터리</option><option>협력</option><option>전략</option>
           <option>파티</option><option>추리</option><option>기타</option>
         </select>
-      </div>
-      <div class="form-row">
         <select id="gDifficulty">
           <option value="">난이도</option>
           <option>입문</option><option>초급</option><option>중급</option><option>고급</option>
         </select>
+      </div>
+      <div class="form-row">
         <input id="gSeries" placeholder="시리즈명 (선택)" />
+        <input id="gSeriesOrder" placeholder="시리즈 순서" type="number" />
       </div>
       <input id="gDesc" placeholder="설명" />
       <input id="gLink" placeholder="링크 (선택)" />
-      <div class="form-row">
-        <input id="gSeriesOrder" placeholder="시리즈 순서" type="number" />
-        <select id="gOneTime">
-          <option value="false">반복 플레이 가능</option>
-          <option value="true">1회성 (머더미스터리 등)</option>
-        </select>
-      </div>
-      <button class="btn btn-green" onclick="addGame()">게임 등록</button>
+      <input id="gImage" placeholder="이미지 URL (선택)" />
+      <select id="gOneTime">
+        <option value="false">반복 플레이 가능</option>
+        <option value="true">1회성 (머더미스터리 등)</option>
+      </select>
+      <button class="btn btn-green" style="margin-top:4px" onclick="addGame()">게임 등록</button>
     </div>
-    <h2>등록된 게임 목록</h2>
+  
+    <h2>등록된 게임 목록 (<span id="gameCount">0</span>개)</h2>
+    <input class="search-bar" placeholder="게임 이름 검색" oninput="filterGames(this.value)" />
     <div id="gameList"></div>
   </div>
 
