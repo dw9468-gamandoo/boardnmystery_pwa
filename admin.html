@@ -415,7 +415,8 @@
     el.innerHTML = '<div style="color:#888;font-size:13px;margin-top:8px">검색 중...</div>';
     try {
       const targetUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query_str)}&type=boardgame`;
-      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;      const res = await fetch(proxyUrl);
+      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;      
+      const res = await fetch(proxyUrl);
       const text = await res.text();
       const parser = new DOMParser();
       const xml = parser.parseFromString(text, 'text/xml');
