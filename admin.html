@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 페이지 - 보드앤미스터리</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      padding: 24px;
+    }
+    h1 { font-size: 20px; margin-bottom: 24px; }
+    h2 { font-size: 16px; color: #aaa; margin: 24px 0 12px; }
+    .login-box {
+      max-width: 320px;
+      margin: 80px auto;
+      text-align: center;
+    }
+    .login-box h1 { margin-bottom: 24px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-approve { background: #1a7a3c; color: #fff; }
+    .btn-reject { background: #7a1a1a; color: #fff; }
+    .btn-warn { background: #7a5a00; color: #fff; }
+    .btn-suspend { background: #4a0000; color: #fff; }
+    .btn-activate { background: #1a4a7a; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .card {
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .nickname { font-size: 16px; font-weight: 600; }
+    .email { font-size: 13px; color: #888; margin-bottom: 4px; }
+    .phone { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .meta { font-size: 12px; color: #666; margin-bottom: 12px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .badge-pending { background: #3a3000; color: #ffcc00; }
+    .badge-active { background: #003a1a; color: #00ff88; }
+    .badge-suspended { background: #3a0000; color: #ff6666; }
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+    }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #888;
+    }
+    .tab.active { background: #fff; color: #000; font-weight: 600; }
+    .count-badge {
+      display: inline-block;
+      background: #ff4444;
+      color: #fff;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+    .empty { color: #555; text-align: center; padding: 40px; }
+    #loginMsg { color: #ff6b6b; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- 관리자 로그인 -->
+<div class="login-box" id="loginBox">
+  <h1>관리자 로그인</h1>
+  <input type="email" id="adminEmail" placeholder="이메일" />
+  <input type="password" id="adminPw" placeholder="비밀번호" />
+  <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">로그인</button>
+  <div id="loginMsg"></div>
+</div>
+
+<!-- 관리자 메인 -->
+<div id="adminMain" style="display:none;">
+  <h1>보드앤미스터리 관리자</h1>
+
+  <div class="tab-row">
+    <div class="tab active" onclick="showTab('pending')">
+      승인 대기 <span class="count-badge" id="pendingCount">0</span>
+    </div>
+    <div class="tab" onclick="showTab('all')">전체 회원</div>
+  </div>
+
+  <div id="tabPending"></div>
+  <div id="tabAll" style="display:none;"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, updateDoc, increment }
+    from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEBj278FWgPBI91U6tcu1_eHIJKSQ1q0k",
+    authDomain: "boardnmystery.firebaseapp.com",
+    projectId: "boardnmystery",
+    storageBucket: "boardnmystery.firebasestorage.app",
+    messagingSenderId: "210410925391",
+    appId: "1:210410925391:web:deb17ddf62e72d507be93a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 관리자 이메일 목록 (네 이메일로 교체해줘)
+  const ADMIN_EMAILS = ['dw9468@gmail.com'];
+
+  window.adminLogin = async function() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pw = document.getElementById('adminPw').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pw);
+    } catch(e) {
+      document.getElementById('loginMsg').textContent = '로그인 실패';
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user && ADMIN_EMAILS.includes(user.email)) {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminMain').style.display = 'block';
+      loadUsers();
+    } else if (user) {
+      document.getElementById('loginMsg').textContent = '관리자 권한이 없습니다.';
+      auth.signOut();
+    }
+  });
+
+  async function loadUsers() {
+    const snap = await getDocs(collection(db, 'users'));
+    const users = [];
+    snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+
+    const pending = users.filter(u => u.memberStatus === 'pending');
+    const all = users.sort((a, b) => a.nickname?.localeCompare(b.nickname));
+
+    document.getElementById('pendingCount').textContent = pending.length;
+    renderPending(pending);
+    renderAll(all);
+  }
+
+  function renderPending(users) {
+    const el = document.getElementById('tabPending');
+    if (users.length === 0) {
+      el.innerHTML = '<div class="empty">승인 대기 중인 회원이 없습니다.</div>';
+      return;
+    }
+    el.innerHTML = users.map(u => `
+      <div class="card" id="card-${u.id}">
+        <div class="card-header">
+          <span class="nickname">${u.nickname}</span>
+          <span class="badge badge-pending">대기중</span>
+        </div>
+        <div class="email">${u.email}</div>
+        <div class="phone">📞 ${u.phone || '-'}</div>
+        <div class="meta">가입일: ${u.joinDate ? u.joinDate.substring(0,10) : '-'}</div>
+        <div class="actions">
+          <button class="btn btn-approve btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>
+          <button class="btn btn-reject btn-sm" onclick="rejectUser('${u.id}')">❌ 거절</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderAll(users) {
+    const el = document.getElementById('tabAll');
+    el.innerHTML = users.map(u => `
+      <div class="card" id="card-all-${u.id}">
+        <div class="card-header">
+          <span class="nickname">${u.nickname}</span>
+          <span class="badge badge-${u.memberStatus || 'pending'}">
+            ${{ pending:'대기', active:'정회원', suspended:'정지' }[u.memberStatus] || '대기'}
+          </span>
+        </div>
+        <div class="email">${u.email}</div>
+        <div class="phone">📞 ${u.phone || '-'}</div>
+        <div class="meta">등급: ${u.grade || '어색'} | 포인트: ${u.point || 0}P | 경고: ${u.warnCount || 0}회</div>
+        <div class="actions">
+          ${u.memberStatus !== 'active' ? `<button class="btn btn-activate btn-sm" onclick="approveUser('${u.id}')">✅ 활성화</button>` : ''}
+          ${u.memberStatus !== 'suspended' ? `<button class="btn btn-suspend btn-sm" onclick="suspendUser('${u.id}')">🚫 정지</button>` : ''}
+          <button class="btn btn-warn btn-sm" onclick="warnUser('${u.id}')">⚠️ 경고</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.showTab = function(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tabPending').style.display = tab === 'pending' ? 'block' : 'none';
+    document.getElementById('tabAll').style.display = tab === 'all' ? 'block' : 'none';
+  };
+
+  window.approveUser = async function(uid) {
+    await updateDoc(doc(db, 'users', uid), { memberStatus: 'active' });
+    alert('승인 완료');
+    loadUsers();
+  };
+
+  window.rejectUser = async function(uid) {
+    if (!confirm('거절하면 해당 계정이 정지됩니다. 계속하시겠습니까?')) return;
+    await updateDoc(doc(db, 'users', uid), { memberStatus: 'suspended' });
+    alert('거절 완료');
+    loadUsers();
+  };
+
+  window.suspendUser = async function(uid) {
+    if (!confirm('이 회원을 정지하시겠습니까?')) return;
+    await updateDoc(doc(db, 'users', uid), { memberStatus: 'suspended' });
+    alert('정지 완료');
+    loadUsers();
+  };
+
+  window.warnUser = async function(uid) {
+    if (!confirm('경고를 1회 부여하시겠습니까?')) return;
+    await updateDoc(doc(db, 'users', uid), { warnCount: increment(1) });
+    alert('경고 부여 완료');
+    loadUsers();
+  };
+</script>
+
+</body>
+</html>
