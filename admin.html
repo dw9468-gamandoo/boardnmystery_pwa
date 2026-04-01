@@ -3,133 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>관리자 페이지 - 보드앤미스터리</title>
+  <title>관리자 - 보드앤미스터리</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      padding: 24px;
-    }
-    h1 { font-size: 20px; margin-bottom: 24px; }
-    h2 { font-size: 16px; color: #aaa; margin: 24px 0 12px; }
-    .login-box {
-      max-width: 320px;
-      margin: 80px auto;
-      text-align: center;
-    }
-    .login-box h1 { margin-bottom: 24px; }
-    input {
-      width: 100%;
-      padding: 12px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-primary { background: #fff; color: #000; }
-    .btn-approve { background: #1a7a3c; color: #fff; }
-    .btn-reject { background: #7a1a1a; color: #fff; }
-    .btn-warn { background: #7a5a00; color: #fff; }
-    .btn-suspend { background: #4a0000; color: #fff; }
-    .btn-activate { background: #1a4a7a; color: #fff; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .card {
-      background: #1a1a1a;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; padding: 20px; }
+    h1 { font-size: 20px; margin-bottom: 20px; }
+    h2 { font-size: 15px; color: #aaa; margin: 20px 0 10px; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; border-bottom: 1px solid #222; padding-bottom: 16px; }
+    .nav-btn { padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid #333; background: transparent; color: #888; }
+    .nav-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: #1a1a1a; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .nickname { font-size: 16px; font-weight: 600; }
-    .email { font-size: 13px; color: #888; margin-bottom: 4px; }
-    .phone { font-size: 13px; color: #888; margin-bottom: 8px; }
-    .meta { font-size: 12px; color: #666; margin-bottom: 12px; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
+    .meta { font-size: 12px; color: #666; margin: 4px 0; }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .btn { padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-white { background: #fff; color: #000; }
+    .btn-green { background: #1a7a3c; color: #fff; }
+    .btn-red { background: #7a1a1a; color: #fff; }
+    .btn-yellow { background: #7a5a00; color: #fff; }
+    .btn-blue { background: #1a4a7a; color: #fff; }
+    .btn-gray { background: #333; color: #aaa; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; }
     .badge-pending { background: #3a3000; color: #ffcc00; }
     .badge-active { background: #003a1a; color: #00ff88; }
     .badge-suspended { background: #3a0000; color: #ff6666; }
-    .tab-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 12px;
-    }
-    .tab {
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #888;
-    }
-    .tab.active { background: #fff; color: #000; font-weight: 600; }
-    .count-badge {
-      display: inline-block;
-      background: #ff4444;
-      color: #fff;
-      border-radius: 10px;
-      padding: 1px 7px;
-      font-size: 11px;
-      margin-left: 4px;
-    }
-    .empty { color: #555; text-align: center; padding: 40px; }
-    #loginMsg { color: #ff6b6b; font-size: 13px; margin-top: 8px; }
+    .count-badge { display: inline-block; background: #ff4444; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; margin-left: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 13px; margin-bottom: 8px; }
+    textarea { height: 80px; resize: vertical; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row input, .form-row select { margin-bottom: 8px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #1a1a1a; border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; }
+    .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+    .empty { color: #555; text-align: center; padding: 40px; font-size: 14px; }
+    .login-box { max-width: 320px; margin: 80px auto; text-align: center; }
+    .login-box h1 { margin-bottom: 24px; }
+    .msg { color: #ff6b6b; font-size: 13px; margin-top: 8px; text-align: center; }
+    .search-bar { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 13px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 
-<!-- 관리자 로그인 -->
 <div class="login-box" id="loginBox">
   <h1>관리자 로그인</h1>
   <input type="email" id="adminEmail" placeholder="이메일" />
   <input type="password" id="adminPw" placeholder="비밀번호" />
-  <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">로그인</button>
-  <div id="loginMsg"></div>
+  <button class="btn btn-white" style="width:100%;padding:12px;font-size:15px" onclick="adminLogin()">로그인</button>
+  <div class="msg" id="loginMsg"></div>
 </div>
 
-<!-- 관리자 메인 -->
 <div id="adminMain" style="display:none;">
   <h1>보드앤미스터리 관리자</h1>
-
-  <div class="tab-row">
-    <div class="tab active" onclick="showTab('pending')">
-      승인 대기 <span class="count-badge" id="pendingCount">0</span>
-    </div>
-    <div class="tab" onclick="showTab('all')">전체 회원</div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('dashboard',this)">📊 대시보드</button>
+    <button class="nav-btn" onclick="showSection('pending',this)">승인대기 <span class="count-badge" id="pendingCount">0</span></button>
+    <button class="nav-btn" onclick="showSection('members',this)">👥 회원관리</button>
+    <button class="nav-btn" onclick="showSection('games',this)">🎲 게임관리</button>
+    <button class="nav-btn" onclick="showSection('badges',this)">🏅 뱃지관리</button>
+    <button class="nav-btn" onclick="showSection('notices',this)">📢 공지사항</button>
   </div>
 
-  <div id="tabPending"></div>
-  <div id="tabAll" style="display:none;"></div>
+  <div class="section active" id="section-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" id="statTotal">-</div><div class="stat-label">전체 회원</div></div>
+      <div class="stat-card"><div class="stat-num" id="statActive">-</div><div class="stat-label">정회원</div></div>
+      <div class="stat-card"><div class="stat-num" id="statPending">-</div><div class="stat-label">승인 대기</div></div>
+      <div class="stat-card"><div class="stat-num" id="statGames">-</div><div class="stat-label">등록 게임</div></div>
+    </div>
+    <h2>등급 분포</h2>
+    <div class="stat-grid" id="gradeStats"></div>
+  </div>
+
+  <div class="section" id="section-pending">
+    <div id="pendingList"></div>
+  </div>
+
+  <div class="section" id="section-members">
+    <input class="search-bar" placeholder="닉네임 또는 이메일 검색" oninput="filterMembers(this.value)" />
+    <div id="memberList"></div>
+  </div>
+
+  <div class="section" id="section-games">
+    <h2>게임 등록</h2>
+    <div class="card">
+      <input id="gName" placeholder="게임 이름 *" />
+      <div class="form-row">
+        <input id="gMax" placeholder="최대 인원 *" type="number" />
+        <select id="gGenre">
+          <option value="">장르 선택</option>
+          <option>머더미스터리</option><option>협력</option><option>전략</option>
+          <option>파티</option><option>추리</option><option>기타</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <select id="gDifficulty">
+          <option value="">난이도</option>
+          <option>입문</option><option>초급</option><option>중급</option><option>고급</option>
+        </select>
+        <input id="gSeries" placeholder="시리즈명 (선택)" />
+      </div>
+      <input id="gDesc" placeholder="설명" />
+      <input id="gLink" placeholder="링크 (선택)" />
+      <div class="form-row">
+        <input id="gSeriesOrder" placeholder="시리즈 순서" type="number" />
+        <select id="gOneTime">
+          <option value="false">반복 플레이 가능</option>
+          <option value="true">1회성 (머더미스터리 등)</option>
+        </select>
+      </div>
+      <button class="btn btn-green" onclick="addGame()">게임 등록</button>
+    </div>
+    <h2>등록된 게임 목록</h2>
+    <div id="gameList"></div>
+  </div>
+
+  <div class="section" id="section-badges">
+    <h2>뱃지 등록</h2>
+    <div class="card">
+      <input id="bName" placeholder="뱃지 이름 *" />
+      <input id="bIcon" placeholder="이모지 아이콘 (예: 🏅)" />
+      <textarea id="bDesc" placeholder="뱃지 설명"></textarea>
+      <input id="bCondition" placeholder="조건 설명 (예: 벙 10회 참여)" />
+      <button class="btn btn-green" onclick="addBadge()">뱃지 등록</button>
+    </div>
+    <h2>등록된 뱃지</h2>
+    <div id="badgeList"></div>
+  </div>
+
+  <div class="section" id="section-notices">
+    <h2>공지 등록</h2>
+    <div class="card">
+      <input id="nTitle" placeholder="제목 *" />
+      <textarea id="nContent" placeholder="내용 *"></textarea>
+      <select id="nType">
+        <option value="general">일반</option>
+        <option value="important">중요</option>
+        <option value="event">이벤트</option>
+      </select>
+      <button class="btn btn-green" onclick="addNotice()">공지 등록</button>
+    </div>
+    <h2>등록된 공지</h2>
+    <div id="noticeList"></div>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc, increment }
+  import { getFirestore, collection, getDocs, doc, updateDoc, addDoc,
+           deleteDoc, increment, serverTimestamp, query, orderBy }
     from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -144,9 +171,8 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-
-  // 관리자 이메일 목록 (네 이메일로 교체해줘)
   const ADMIN_EMAILS = ['dw9468@gmail.com'];
+  let allUsers = [];
 
   window.adminLogin = async function() {
     const email = document.getElementById('adminEmail').value.trim();
@@ -162,105 +188,282 @@
     if (user && ADMIN_EMAILS.includes(user.email)) {
       document.getElementById('loginBox').style.display = 'none';
       document.getElementById('adminMain').style.display = 'block';
-      loadUsers();
+      loadAll();
     } else if (user) {
       document.getElementById('loginMsg').textContent = '관리자 권한이 없습니다.';
-      auth.signOut();
+      await auth.signOut();
     }
   });
 
-  async function loadUsers() {
-    const snap = await getDocs(collection(db, 'users'));
-    const users = [];
-    snap.forEach(d => users.push({ id: d.id, ...d.data() }));
-
-    const pending = users.filter(u => u.memberStatus === 'pending');
-    const all = users.sort((a, b) => a.nickname?.localeCompare(b.nickname));
-
-    document.getElementById('pendingCount').textContent = pending.length;
-    renderPending(pending);
-    renderAll(all);
+  async function loadAll() {
+    await loadUsers();
+    await loadGames();
+    await loadBadges();
+    await loadNotices();
   }
 
-  function renderPending(users) {
-    const el = document.getElementById('tabPending');
-    if (users.length === 0) {
-      el.innerHTML = '<div class="empty">승인 대기 중인 회원이 없습니다.</div>';
-      return;
-    }
+  async function loadUsers() {
+    const snap = await getDocs(collection(db, 'users'));
+    allUsers = [];
+    snap.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
+    const pending = allUsers.filter(u => u.memberStatus === 'pending');
+    document.getElementById('pendingCount').textContent = pending.length;
+    document.getElementById('statTotal').textContent = allUsers.length;
+    document.getElementById('statActive').textContent = allUsers.filter(u => u.memberStatus === 'active').length;
+    document.getElementById('statPending').textContent = pending.length;
+    const grades = ['어색','익숙','친한','편한'];
+    document.getElementById('gradeStats').innerHTML = grades.map(g => {
+      const cnt = allUsers.filter(u => u.grade === g).length;
+      return `<div class="stat-card"><div class="stat-num">${cnt}</div><div class="stat-label">${g}</div></div>`;
+    }).join('');
+    renderPending(pending);
+    renderMembers(allUsers);
+  }
+
+    function renderPending(users) {
+    const el = document.getElementById('pendingList');
+    if (!users.length) { el.innerHTML = '<div class="empty">승인 대기 중인 회원이 없습니다.</div>'; return; }
     el.innerHTML = users.map(u => `
-      <div class="card" id="card-${u.id}">
+      <div class="card">
         <div class="card-header">
           <span class="nickname">${u.nickname}</span>
           <span class="badge badge-pending">대기중</span>
         </div>
-        <div class="email">${u.email}</div>
-        <div class="phone">📞 ${u.phone || '-'}</div>
+        <div class="meta">${u.email}</div>
+        <div class="meta">📞 ${u.phone || '-'}</div>
         <div class="meta">가입일: ${u.joinDate ? u.joinDate.substring(0,10) : '-'}</div>
         <div class="actions">
-          <button class="btn btn-approve btn-sm" onclick="approveUser('${u.id}')">✅ 승인</button>
-          <button class="btn btn-reject btn-sm" onclick="rejectUser('${u.id}')">❌ 거절</button>
+          <button class="btn btn-green" onclick="approveUser('${u.id}')">✅ 승인</button>
+          <button class="btn btn-red" onclick="rejectUser('${u.id}')">❌ 거절</button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  function renderAll(users) {
-    const el = document.getElementById('tabAll');
+  function renderMembers(users) {
+    const el = document.getElementById('memberList');
+    if (!users.length) { el.innerHTML = '<div class="empty">회원이 없습니다.</div>'; return; }
     el.innerHTML = users.map(u => `
-      <div class="card" id="card-all-${u.id}">
+      <div class="card">
         <div class="card-header">
           <span class="nickname">${u.nickname}</span>
-          <span class="badge badge-${u.memberStatus || 'pending'}">
-            ${{ pending:'대기', active:'정회원', suspended:'정지' }[u.memberStatus] || '대기'}
-          </span>
+          <span class="badge badge-${u.memberStatus || 'pending'}">${{pending:'대기',active:'정회원',suspended:'정지'}[u.memberStatus]||'대기'}</span>
         </div>
-        <div class="email">${u.email}</div>
-        <div class="phone">📞 ${u.phone || '-'}</div>
-        <div class="meta">등급: ${u.grade || '어색'} | 포인트: ${u.point || 0}P | 경고: ${u.warnCount || 0}회</div>
+        <div class="meta">${u.email} | 📞 ${u.phone || '-'}</div>
+        <div class="meta">등급: ${u.grade||'어색'} | 포인트: ${u.point||0}P | 경고: ${u.warnCount||0}회</div>
         <div class="actions">
-          ${u.memberStatus !== 'active' ? `<button class="btn btn-activate btn-sm" onclick="approveUser('${u.id}')">✅ 활성화</button>` : ''}
-          ${u.memberStatus !== 'suspended' ? `<button class="btn btn-suspend btn-sm" onclick="suspendUser('${u.id}')">🚫 정지</button>` : ''}
-          <button class="btn btn-warn btn-sm" onclick="warnUser('${u.id}')">⚠️ 경고</button>
+          ${u.memberStatus !== 'active' ? `<button class="btn btn-blue" onclick="approveUser('${u.id}')">✅ 활성화</button>` : ''}
+          ${u.memberStatus !== 'suspended' ? `<button class="btn btn-red" onclick="suspendUser('${u.id}')">🚫 정지</button>` : ''}
+          <button class="btn btn-yellow" onclick="warnUser('${u.id}')">⚠️ 경고</button>
+          <button class="btn btn-green" onclick="openPointModal('${u.id}','${u.nickname}')">💰 포인트</button>
+          <button class="btn btn-gray" onclick="changeGrade('${u.id}','${u.grade||'어색'}')">🎖 등급변경</button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  window.showTab = function(tab) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('tabPending').style.display = tab === 'pending' ? 'block' : 'none';
-    document.getElementById('tabAll').style.display = tab === 'all' ? 'block' : 'none';
+  window.filterMembers = function(val) {
+    const filtered = allUsers.filter(u =>
+      u.nickname?.includes(val) || u.email?.includes(val)
+    );
+    renderMembers(filtered);
   };
 
   window.approveUser = async function(uid) {
     await updateDoc(doc(db, 'users', uid), { memberStatus: 'active' });
-    alert('승인 완료');
-    loadUsers();
+    alert('승인 완료'); loadUsers();
   };
 
   window.rejectUser = async function(uid) {
-    if (!confirm('거절하면 해당 계정이 정지됩니다. 계속하시겠습니까?')) return;
+    if (!confirm('거절하시겠습니까?')) return;
     await updateDoc(doc(db, 'users', uid), { memberStatus: 'suspended' });
-    alert('거절 완료');
-    loadUsers();
+    alert('거절 완료'); loadUsers();
   };
 
   window.suspendUser = async function(uid) {
-    if (!confirm('이 회원을 정지하시겠습니까?')) return;
+    if (!confirm('정지하시겠습니까?')) return;
     await updateDoc(doc(db, 'users', uid), { memberStatus: 'suspended' });
-    alert('정지 완료');
-    loadUsers();
+    alert('정지 완료'); loadUsers();
   };
 
   window.warnUser = async function(uid) {
-    if (!confirm('경고를 1회 부여하시겠습니까?')) return;
-    await updateDoc(doc(db, 'users', uid), { warnCount: increment(1) });
-    alert('경고 부여 완료');
+    if (!confirm('경고 1회 부여하시겠습니까?')) return;
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { warnCount: increment(1) });
+    const snap = await getDocs(collection(db, 'users'));
+    const user = snap.docs.find(d => d.id === uid)?.data();
+    if (user && (user.warnCount || 0) >= 3) {
+      await updateDoc(userRef, { memberStatus: 'suspended' });
+      alert('경고 3회 누적 — 자동 정지 처리됨');
+    } else {
+      alert('경고 부여 완료');
+    }
     loadUsers();
   };
-</script>
 
+  window.openPointModal = function(uid, nickname) {
+    const amount = prompt(`${nickname}님 포인트 지급/차감\n양수: 지급, 음수: 차감\n예) 1000 또는 -500`);
+    if (amount === null || amount === '') return;
+    const num = parseInt(amount);
+    if (isNaN(num)) { alert('숫자를 입력해주세요.'); return; }
+    const reason = prompt('사유를 입력해주세요.') || '관리자 수동 조정';
+    adjustPoint(uid, num, reason);
+  };
+
+  async function adjustPoint(uid, amount, reason) {
+    await updateDoc(doc(db, 'users', uid), { point: increment(amount) });
+    await addDoc(collection(db, 'pointLog'), {
+      uid, amount, reason,
+      type: amount > 0 ? 'earn' : 'use',
+      timestamp: serverTimestamp()
+    });
+    alert(`포인트 ${amount > 0 ? '+' : ''}${amount} 처리 완료`);
+    loadUsers();
+  }
+
+  window.changeGrade = async function(uid, currentGrade) {
+    const grades = ['어색', '익숙', '친한', '편한'];
+    const grade = prompt(`등급 변경\n현재: ${currentGrade}\n입력: 어색 / 익숙 / 친한 / 편한`);
+    if (!grade || !grades.includes(grade)) { alert('올바른 등급을 입력해주세요.'); return; }
+    await updateDoc(doc(db, 'users', uid), { grade });
+    await addDoc(collection(db, 'gradeLog'), {
+      uid, fromGrade: currentGrade, toGrade: grade,
+      reason: '관리자 수동 변경',
+      timestamp: serverTimestamp()
+    });
+    alert('등급 변경 완료'); loadUsers();
+  };
+
+  // ── 게임 ──
+  async function loadGames() {
+    const snap = await getDocs(query(collection(db, 'games'), orderBy('name')));
+    const games = [];
+    snap.forEach(d => games.push({ id: d.id, ...d.data() }));
+    document.getElementById('statGames').textContent = games.length;
+    document.getElementById('gameList').innerHTML = games.length ? games.map(g => `
+      <div class="card">
+        <div class="card-header">
+          <span class="nickname">${g.name}</span>
+          <span style="font-size:12px;color:#666">${g.genre||''} | ${g.difficulty||''}</span>
+        </div>
+        <div class="meta">최대 ${g.max||'-'}명 | ${g.oneTime ? '1회성' : '반복'} | 시리즈: ${g.series||'-'}</div>
+        <div class="meta">${g.desc||''}</div>
+        <div class="actions">
+          <button class="btn btn-red" onclick="deleteGame('${g.id}')">🗑 삭제</button>
+        </div>
+      </div>`).join('') : '<div class="empty">등록된 게임이 없습니다.</div>';
+  }
+
+  window.addGame = async function() {
+    const name = document.getElementById('gName').value.trim();
+    const max = document.getElementById('gMax').value;
+    if (!name || !max) { alert('게임 이름과 최대 인원은 필수입니다.'); return; }
+    await addDoc(collection(db, 'games'), {
+      name,
+      max: parseInt(max),
+      genre: document.getElementById('gGenre').value,
+      difficulty: document.getElementById('gDifficulty').value,
+      series: document.getElementById('gSeries').value,
+      seriesOrder: parseInt(document.getElementById('gSeriesOrder').value) || 0,
+      desc: document.getElementById('gDesc').value,
+      link: document.getElementById('gLink').value,
+      oneTime: document.getElementById('gOneTime').value === 'true',
+      rating: 0, ratingCount: 0,
+      createdAt: serverTimestamp()
+    });
+    ['gName','gMax','gDesc','gLink','gSeries','gSeriesOrder'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('gGenre').value = '';
+    document.getElementById('gDifficulty').value = '';
+    document.getElementById('gOneTime').value = 'false';
+    alert('게임 등록 완료'); loadGames();
+  };
+
+  window.deleteGame = async function(id) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await deleteDoc(doc(db, 'games', id));
+    alert('삭제 완료'); loadGames();
+  };
+
+  // ── 뱃지 ──
+  async function loadBadges() {
+    const snap = await getDocs(collection(db, 'badges'));
+    const badges = [];
+    snap.forEach(d => badges.push({ id: d.id, ...d.data() }));
+    document.getElementById('badgeList').innerHTML = badges.length ? badges.map(b => `
+      <div class="card">
+        <div class="card-header">
+          <span class="nickname">${b.icon||'🏅'} ${b.name}</span>
+          <button class="btn btn-red" onclick="deleteBadge('${b.id}')">🗑</button>
+        </div>
+        <div class="meta">${b.desc||''}</div>
+        <div class="meta">조건: ${b.condition||'-'}</div>
+      </div>`).join('') : '<div class="empty">등록된 뱃지가 없습니다.</div>';
+  }
+
+  window.addBadge = async function() {
+    const name = document.getElementById('bName').value.trim();
+    if (!name) { alert('뱃지 이름은 필수입니다.'); return; }
+    await addDoc(collection(db, 'badges'), {
+      name,
+      icon: document.getElementById('bIcon').value,
+      desc: document.getElementById('bDesc').value,
+      condition: document.getElementById('bCondition').value,
+      createdAt: serverTimestamp()
+    });
+    ['bName','bIcon','bDesc','bCondition'].forEach(id => document.getElementById(id).value = '');
+    alert('뱃지 등록 완료'); loadBadges();
+  };
+
+  window.deleteBadge = async function(id) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await deleteDoc(doc(db, 'badges', id));
+    alert('삭제 완료'); loadBadges();
+  };
+
+  // ── 공지사항 ──
+  async function loadNotices() {
+    const snap = await getDocs(query(collection(db, 'notices'), orderBy('createdAt', 'desc')));
+    const notices = [];
+    snap.forEach(d => notices.push({ id: d.id, ...d.data() }));
+    document.getElementById('noticeList').innerHTML = notices.length ? notices.map(n => `
+      <div class="card">
+        <div class="card-header">
+          <span class="nickname">${n.title}</span>
+          <span style="font-size:11px;color:#666">${{general:'일반',important:'중요',event:'이벤트'}[n.type]||''}</span>
+        </div>
+        <div class="meta">${n.content}</div>
+        <div class="actions">
+          <button class="btn btn-red" onclick="deleteNotice('${n.id}')">🗑 삭제</button>
+        </div>
+      </div>`).join('') : '<div class="empty">등록된 공지가 없습니다.</div>';
+  }
+
+  window.addNotice = async function() {
+    const title = document.getElementById('nTitle').value.trim();
+    const content = document.getElementById('nContent').value.trim();
+    if (!title || !content) { alert('제목과 내용은 필수입니다.'); return; }
+    await addDoc(collection(db, 'notices'), {
+      title, content,
+      type: document.getElementById('nType').value,
+      createdAt: serverTimestamp()
+    });
+    ['nTitle','nContent'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('nType').value = 'general';
+    alert('공지 등록 완료'); loadNotices();
+  };
+
+  window.deleteNotice = async function(id) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await deleteDoc(doc(db, 'notices', id));
+    alert('삭제 완료'); loadNotices();
+  };
+
+  // ── 네비게이션 ──
+  window.showSection = function(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    btn.classList.add('active');
+  };
+
+</script>
 </body>
 </html>
